@@ -88,18 +88,3 @@ class Jenkins(object):
             if all(matches):
                 build['matches'] = matches
                 yield build
-
-
-if __name__ == '__main__':
-    auth = requests.auth.HTTPBasicAuth('kogut.andriy', 'fjn4094mcF')
-    jenkins = Jenkins(auth, 'http://build.buzzfeed.com')
-    import re
-    builds = jenkins.matching_builds(
-        'buzzfeed-selenium-downstream',
-        ["fullDisplayName", "number", "timestamp"],
-        {
-            "fullDisplayName": re.compile(r'^BuzzFeed Selenium Downstream #\d+ (release[\d\.]+)')
-        }
-    )
-    for build in builds:
-        print(build)
