@@ -13,7 +13,7 @@ setuptools.setup(
 
     packages=setuptools.find_packages(),
 
-    install_requires=[],
+    install_requires=['PyYAML', 'colorama', 'requests'],
 
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
@@ -23,4 +23,10 @@ setuptools.setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
     ],
+
+    entry_points={
+        'console_scripts': [
+            'bdiff=builddiff.cli:main',
+        ],
+    },
 )
