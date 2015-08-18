@@ -1,13 +1,34 @@
 from __future__ import print_function
 
 import os
+import re
 import argparse
 from getpass import getpass
+from operator import or_
+from functools import reduce
 
 import yaml
 from requests.auth import HTTPBasicAuth
 
 from jenkins import Jenkins
+
+
+RE_FLAGS = ('I', 'L', 'M', 'S', 'U', 'X')
+
+
+def parse_flags(arg):
+    """Parse flags from command line argument.
+
+    :arg: Argument string
+    :returns: flag value
+
+    """
+    flags = set(f.upper() for f in arg.split('|'))
+    for f in flags:
+        if f not in RE_FLAGS:
+            raise argparse.ArgumentTypeError('Invalid re flags')
+    flags = set(getattr(re, f) for f in flags)
+    return reduce(or_, flags)
 
 
 def parse_args():
@@ -17,10 +38,12 @@ def parse_args():
 
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('build_a', help='build A', metavar='A', type=int)
-    parser.add_argument('build_b', help='build B', metavar='B', type=int)
+    parser.add_argument('build_a', help='build A (good)', metavar='A', type=int)
+    parser.add_argument('build_b', help='build B (bad)', metavar='B', type=int)
     parser.add_argument('-c', '--config', default=os.path.expanduser("~/.bdiff"),
                         help='A path to configuration file [Default: ~/.bdiff]')
+    parser.add_argument('-f', '--flags', help='Python regex flags, eg: "I" or "I|M"', type=parse_flags)
+    parser.add_argument('-r', '--re', help='Regex for parsing console output')
     return parser.parse_args()
 
 
