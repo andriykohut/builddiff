@@ -18,7 +18,7 @@ Console output example:
 ...
 ```
 Let's try:
-```
+```bash
 bdiff 167 101 -r "^\s+\d+\)\s(?P<test_file>[\w|\-]+\.js)\s(?P<test_case>.+):$" -f "I|M"
 
 ```
