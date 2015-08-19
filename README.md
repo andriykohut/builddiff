@@ -3,7 +3,7 @@
 ![https://travis-ci.org/andriykohut/builddiff](https://travis-ci.org/andriykohut/builddiff.png)
 
 
-Compate console output of Jenkins builds
+Compare console output of Jenkins builds
 
 ## Usage
 Console output example:
