@@ -107,7 +107,7 @@ def config_setup(config_path):
     conf['jenkins']['user'] = raw_input('User name: ').strip()
     conf['jenkins']['password'] = getpass('Password: ')
     with open(config_path, 'w') as f:
-        yaml.dump(conf, f)
+        yaml.dump(conf, f, default_flow_style=False)
     print("Config saved to {}".format(config_path))
     return conf
 
