@@ -9,7 +9,7 @@ setuptools.setup(
     author_email="kogut.andriy@gmail.com",
 
     description="Compate console output of Jenkins builds",
-    long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
 
     packages=setuptools.find_packages(),
 
