@@ -1,4 +1,9 @@
 from __future__ import print_function
+try:
+    import __builtin__
+    input = getattr(__builtin__, 'raw_input')
+except (ImportError, AttributeError):
+    pass
 
 import os
 import sys
@@ -12,8 +17,8 @@ import yaml
 from requests.auth import HTTPBasicAuth
 from colorama import Fore
 
-from jenkins import Jenkins
-from groupby_regex import parse_tests, compare_sel_failures
+from builddiff.jenkins import Jenkins
+from builddiff.groupby_regex import parse_tests, compare_sel_failures
 
 
 RE_FLAGS = ('I', 'L', 'M', 'S', 'U', 'X')
@@ -131,7 +136,7 @@ def main():
     for k, v in builds.items():
         if not v:
             raise Exception("Build #{} not found".format(args.__dict__[k]))
-    regex = re.compile(args.re.decode('string_escape'), args.flags)
+    regex = re.compile(args.re, args.flags)
     tests_a = parse_tests(builds['build_a'].console_output(), regex)
     tests_b = parse_tests(builds['build_b'].console_output(), regex)
     diff = compare_sel_failures(tests_a, tests_b)
