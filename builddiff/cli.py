@@ -103,6 +103,7 @@ def config_setup(config_path):
     print("Setting up jenkins config")
     conf = {'jenkins': {}}
     conf['jenkins']['url'] = raw_input('Jenkins url (e.g.: http://build.mydomain.com): ').strip()
+    conf['jenkins']['job'] = raw_input('Job name: ').strip()
     conf['jenkins']['user'] = raw_input('User name: ').strip()
     conf['jenkins']['password'] = getpass('Password: ')
     with open(config_path, 'w') as f:
@@ -122,7 +123,7 @@ def main():
     auth = HTTPBasicAuth(conf['jenkins']['user'], conf['jenkins']['password'])
     jenkins = Jenkins(auth, conf['jenkins']['url'])
     builds = {'build_a': None, 'build_b': None}
-    for build in jenkins.builds('buzzfeed-selenium-downstream', ["fullDisplayName", "number", "timestamp"]):
+    for build in jenkins.builds(conf['jenkins']['job'], ["fullDisplayName", "number", "timestamp"]):
         if build.number == args.build_a:
             builds['build_a'] = build
         elif build.number == args.build_b:
