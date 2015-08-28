@@ -4,7 +4,7 @@ try:
 except ImportError:
     import unittest
 
-from builddiff.groupby_regex import compare_sel_failures, parse_tests
+from builddiff.utils import group_by_regex
 
 
 class GroupByRegexTest(unittest.TestCase):
@@ -19,15 +19,17 @@ class GroupByRegexTest(unittest.TestCase):
     def test_parse_tests_should_have_named_groups(self):
         self.assertRaises(
             ValueError,
-            lambda: parse_tests(self.console_output, re.compile('^(\w+)\.py\s(\w+)$', re.M))
+            lambda: group_by_regex(self.console_output, re.compile('^(\w+)\.py\s(\w+)$', re.M), 'keys', 'values')
         )
         self.assertRaises(
             ValueError,
-            lambda: parse_tests(self.console_output, re.compile('^(?P<abra>\w+)\.py\s(?P<cadabra>\w+)$', re.M))
+            lambda: group_by_regex(self.console_output, re.compile('^(?P<abra>\w+)\.py\s(?P<cadabra>\w+)$', re.M),
+                                   'keys', 'values')
         )
 
     def test_parse_tests_should_return_proper_dict(self):
-        tests = parse_tests(self.console_output, re.compile('^(?P<test_file>\w+)\.py\s(?P<test_case>\w+)$', re.M))
+        tests = group_by_regex(self.console_output, re.compile('^(?P<test_file>\w+)\.py\s(?P<test_case>\w+)$', re.M),
+                               'test_file', 'test_case')
         self.assertEquals(len(tests['test1']), 2)
         self.assertEquals(len(tests['test2']), 1)
         self.assertEquals(len(tests['test3']), 1)
