@@ -19,17 +19,16 @@ Console output example:
 ```
 Let's try:
 ```bash
-bdiff 167 101 -r "^\s+\d+\)\s(?P<test_file>[\w|\-]+\.js)\s(?P<test_case>.+):$" -f "I|M"
-
+bd -r "^\s+\d+\)\s(?P<key>[\w|\-]+\.js)\s(?P<values>.+):$" -f "I|M" list 589
+bd -r "^\s+\d+\)\s(?P<key>[\w|\-]+\.js)\s(?P<values>.+):$" -f "I|M" diff 589 590 --color
 ```
 Here how it works:
 ```
-bdiff -h
-usage: bdiff [-h] [-c CONFIG] [-f FLAGS] [-r RE] A B
+usage: bd [-h] [-c CONFIG] [-f FLAGS] [-r RE] [-k KEY_GROUP] [-v VALUES_GROUP]
+          {diff,list} ...
 
 positional arguments:
-  A                     build A (good)
-  B                     build B (bad)
+  {diff,list}           commands
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -38,6 +37,10 @@ optional arguments:
   -f FLAGS, --flags FLAGS
                         Python regex flags, eg: "I" or "I|M"
   -r RE, --re RE        Regex for parsing console output
+  -k KEY_GROUP, --key KEY_GROUP
+                        key group name [Default: key]
+  -v VALUES_GROUP, --values VALUES_GROUP
+                        values group name [Default: values]
 ```
 ## Installation
 ```
@@ -45,7 +48,7 @@ virtualenv myenv
 source myenv/bin/activate
 pip install git+git://github.com/andriykohut/builddiff
 
-bdiff -h
+bd -h
 ```
 ## Authors
 
