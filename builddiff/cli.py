@@ -15,16 +15,15 @@ from functools import reduce
 
 import yaml
 from requests.auth import HTTPBasicAuth
-from colorama import Fore
 
-from builddiff.jenkins import Jenkins
-from builddiff.groupby_regex import parse_tests, compare_sel_failures
+from builddiff.jenkins import Build
+from builddiff.utils import group_by_regex, dict_diff, format_diff
 
 
 RE_FLAGS = ('I', 'L', 'M', 'S', 'U', 'X')
 
 
-def parse_flags(arg):
+def _parse_flags(arg):
     """Parse flags from command line argument.
 
     :arg: Argument string
@@ -39,49 +38,6 @@ def parse_flags(arg):
     return reduce(or_, flags)
 
 
-def print_diff(diff):
-    """Pretty print the diff.
-
-    :diff: Named tuple (failures_a, failures_b, cases_diff)
-
-    """
-    print("A-only failures")
-    print("---------------")
-    sys.stdout.write(Fore.RED)
-    for test_file, cases in diff.failures_a.items():
-        print("+ {}".format(test_file))
-        for case in cases:
-            print("\t+ {}".format(case))
-    sys.stdout.write(Fore.RESET)
-    print("B-only failures")
-    print("---------------")
-    sys.stdout.write(Fore.GREEN)
-    for test_file, cases in diff.failures_b.items():
-        print("- {}".format(test_file))
-        for case in cases:
-            print("\t- {}".format(case))
-    sys.stdout.write(Fore.RESET)
-    print("Cases diff")
-    print("----------")
-    for fname, diffs in diff.cases_diff.items():
-        print(fname)
-        if 'a' in diffs:
-            sys.stdout.write(Fore.RED)
-            for case in diffs['a']:
-                print("\t+ {}".format(case))
-            sys.stdout.write(Fore.RESET)
-        if 'b' in diffs:
-            sys.stdout.write(Fore.GREEN)
-            for case in diffs['b']:
-                print("\t- {}".format(case))
-            sys.stdout.write(Fore.RESET)
-        if 'common' in diffs:
-            sys.stdout.write(Fore.YELLOW)
-            for case in diffs['common']:
-                print("\t= {}".format(case))
-            sys.stdout.write(Fore.RESET)
-
-
 def parse_args():
     """Parse command-line arguments.
 
@@ -89,12 +45,20 @@ def parse_args():
 
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('build_a', help='build A (good)', metavar='A', type=int)
-    parser.add_argument('build_b', help='build B (bad)', metavar='B', type=int)
+    subparsers = parser.add_subparsers(help='commands', dest='command')
+    diff = subparsers.add_parser('diff')
+    diff.add_argument('build_a', help='build A', metavar='A', type=int)
+    diff.add_argument('build_b', help='build B', metavar='B', type=int)
+    diff.add_argument('--color', action='store_true', default=False, help='colored output')
+    _list = subparsers.add_parser('list')
+    _list.add_argument('build', help='build number', type=int)
     parser.add_argument('-c', '--config', default=os.path.expanduser("~/.bdiff"),
                         help='A path to configuration file [Default: ~/.bdiff]')
-    parser.add_argument('-f', '--flags', help='Python regex flags, eg: "I" or "I|M"', default=0, type=parse_flags)
+    parser.add_argument('-f', '--flags', help='Python regex flags, eg: "I" or "I|M"', default=0, type=_parse_flags)
     parser.add_argument('-r', '--re', help='Regex for parsing console output')
+    parser.add_argument('-k', '--key', help='key group name [Default: %(default)s]', default='key', dest='key_group')
+    parser.add_argument('-v', '--values', help='values group name [Default: %(default)s]', default='values',
+                        dest='values_group')
     return parser.parse_args()
 
 
@@ -126,18 +90,19 @@ def main():
         with open(args.config) as f:
             conf = yaml.load(f)
     auth = HTTPBasicAuth(conf['jenkins']['user'], conf['jenkins']['password'])
-    jenkins = Jenkins(auth, conf['jenkins']['url'])
-    builds = {'build_a': None, 'build_b': None}
-    for build in jenkins.builds(conf['jenkins']['job'], ["fullDisplayName", "number", "timestamp"]):
-        if build.number == args.build_a:
-            builds['build_a'] = build
-        elif build.number == args.build_b:
-            builds['build_b'] = build
-    for k, v in builds.items():
-        if not v:
-            raise Exception("Build #{} not found".format(args.__dict__[k]))
     regex = re.compile(args.re, args.flags)
-    tests_a = parse_tests(builds['build_a'].console_output(), regex)
-    tests_b = parse_tests(builds['build_b'].console_output(), regex)
-    diff = compare_sel_failures(tests_a, tests_b)
-    print_diff(diff)
+    if args.command == 'list':
+        build = Build(auth, conf['jenkins']['url'], conf['jenkins']['job'], args.build)
+        grouped = group_by_regex(build.console_output(), regex, args.key_group, args.values_group)
+        for key, values in grouped.items():
+            print(key)
+            for value in values:
+                print("\t{}".format(value))
+            print()
+    elif args.command == 'diff':
+        build_a = Build(auth, conf['jenkins']['url'], conf['jenkins']['job'], args.build_a)
+        build_b = Build(auth, conf['jenkins']['url'], conf['jenkins']['job'], args.build_b)
+        groups_a = group_by_regex(build_a.console_output(), regex, args.key_group, args.values_group)
+        groups_b = group_by_regex(build_b.console_output(), regex, args.key_group, args.values_group)
+        diff = dict_diff(groups_a, groups_b)
+        sys.stdout.write(format_diff(diff, color=args.color).getvalue())

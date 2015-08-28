@@ -7,7 +7,7 @@ class Build(object):
 
     """Jenkins build."""
 
-    def __init__(self, auth, url, job, number, data):
+    def __init__(self, auth, url, job, number, **kwargs):
         """Wraps jenkins build info.
 
         :auth: Requests auth instance.
@@ -21,7 +21,7 @@ class Build(object):
         self.url = url
         self.job = job
         self.number = number
-        self._data = data
+        self._data = kwargs
 
     def console_output(self):
         """Get console output of build.
@@ -68,7 +68,7 @@ class Jenkins(object):
         url = urljoin(self._url, '/job/{}/api/json/build'.format(job))
         params = "depth=1&tree=builds[{}]".format(','.join(tree))
         for build in requests.get(url, params, auth=self._auth).json()['builds']:
-            yield Build(self._auth, self._url, job, build['number'], build)
+            yield Build(self._auth, self._url, job, build['number'], **build)
 
     def matching_builds(self, job, tree, match_map):
         """Find bulds where key matches regex.

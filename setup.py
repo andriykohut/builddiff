@@ -26,7 +26,7 @@ setuptools.setup(
 
     entry_points={
         'console_scripts': [
-            'bdiff=builddiff.cli:main',
+            'bd=builddiff.cli:main',
         ],
     },
 )
