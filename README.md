@@ -52,6 +52,17 @@ pip install git+git://github.com/andriykohut/builddiff
 
 bd -h
 ```
+## Config
+You will be prompted for configuration first time you run `bd`.
+Here's how config looks like:
+```yaml
+cat ~/.bdiff
+jenkins:
+  url: <jenkins-host>
+  job: <jenkins-job-name>
+  user: <jenkins-user>
+  password: <jenkins-password>
+```
 ## Authors
 
 `builddiff` was written by [Andriy Kogut](mailto:kogut.andriy@gmail.com).
