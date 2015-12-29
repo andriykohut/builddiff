@@ -19,7 +19,10 @@ Let's try:
 ```bash
 bd -r "^\s+\d+\)\s(?P<key>[\w|\-]+\.js)\s(?P<values>.+):$" -f "I|M" list 589
 bd -r "^\s+\d+\)\s(?P<key>[\w|\-]+\.js)\s(?P<values>.+):$" -f "I|M" diff 589 590 --color
+bd list 16475 16476 16477 16478 16479 16480 16481 16482
 ```
+The last one lists failures for multiple builds and uses default regex and flags
+
 Here how it works:
 ```
 usage: bd [-h] [-c CONFIG] [-f FLAGS] [-r RE] [-k KEY_GROUP] [-v VALUES_GROUP]
@@ -33,8 +36,9 @@ optional arguments:
   -c CONFIG, --config CONFIG
                         A path to configuration file [Default: ~/.bdiff]
   -f FLAGS, --flags FLAGS
-                        Python regex flags, eg: "I" or "I|M"
-  -r RE, --re RE        Regex for parsing console output
+                        Python regex flags, eg: "I" or "I|M" [Default: I|M]
+  -r RE, --re RE        Regex for parsing console output. [Default:
+                        ^\s+\d+\)\s(?P<key>[\w|\-]+\.js)\s(?P<values>.+):$]
   -k KEY_GROUP, --key KEY_GROUP
                         key group name [Default: key]
   -v VALUES_GROUP, --values VALUES_GROUP
