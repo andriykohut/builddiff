@@ -55,8 +55,9 @@ def parse_args():
     _list.add_argument('--keys-only', help='List only matching keys', default=False, action='store_true', dest='keys_only')
     parser.add_argument('-c', '--config', default=os.path.expanduser("~/.bdiff"),
                         help='A path to configuration file [Default: ~/.bdiff]')
-    parser.add_argument('-f', '--flags', help='Python regex flags, eg: "I" or "I|M"', default=0, type=_parse_flags)
-    parser.add_argument('-r', '--re', help='Regex for parsing console output')
+    parser.add_argument('-f', '--flags', help='Python regex flags, eg: "I" or "I|M" [Default: %(default)s]', default="I|M", type=_parse_flags)
+    parser.add_argument('-r', '--re', help='Regex for parsing console output. [Default: %(default)s]',
+                        default='^\s+\d+\)\s(?P<key>[\w|\-]+\.js)\s(?P<values>.+):$')
     parser.add_argument('-k', '--key', help='key group name [Default: %(default)s]', default='key', dest='key_group')
     parser.add_argument('-v', '--values', help='values group name [Default: %(default)s]', default='values',
                         dest='values_group')
