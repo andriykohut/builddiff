@@ -1,7 +1,5 @@
 # builddiff
-
-![https://travis-ci.org/andriykohut/builddiff](https://travis-ci.org/andriykohut/builddiff.png)
-
+[![travis](https://travis-ci.org/andriykohut/builddiff.png)](https://travis-ci.org/andriykohut/builddiff)
 
 Compare console output of Jenkins builds
 
