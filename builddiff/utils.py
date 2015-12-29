@@ -16,24 +16,26 @@ def format_diff(diff, color=True):
 
     """
     result = StringIO()
-    result.write("A-only\n{}\n".format('-' * 50))
-    if color:
-        result.write(Fore.GREEN)
-    for key, values in diff.a_only.items():
-        result.write("+ {}\n".format(key))
-        for value in values:
-            result.write("+ \t{}\n".format(value))
-    if color:
-        result.write(Fore.RESET)
-    result.write("B-only\n{}\n".format('-' * 50))
-    if color:
-        result.write(Fore.RED)
-    for key, values in diff.b_only.items():
-        result.write("- {}\n".format(key))
-        for value in values:
-            result.write("- \t{}\n".format(value))
-    if color:
-        result.write(Fore.RESET)
+    if diff.a_only:
+        result.write("A-only\n{}\n".format('-' * 50))
+        if color:
+            result.write(Fore.GREEN)
+        for key, values in diff.a_only.items():
+            result.write("+ {}\n".format(key))
+            for value in values:
+                result.write("+ \t{}\n".format(value))
+        if color:
+            result.write(Fore.RESET)
+    if diff.b_only:
+        result.write("B-only\n{}\n".format('-' * 50))
+        if color:
+            result.write(Fore.RED)
+        for key, values in diff.b_only.items():
+            result.write("- {}\n".format(key))
+            for value in values:
+                result.write("- \t{}\n".format(value))
+        if color:
+            result.write(Fore.RESET)
     result.write("Diff\n{}\n".format('-' * 50))
     for key, values in diff.diff.items():
         result.write('{}\n'.format(key))

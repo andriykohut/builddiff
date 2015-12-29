@@ -51,7 +51,8 @@ def parse_args():
     diff.add_argument('build_b', help='build B', metavar='B', type=int)
     diff.add_argument('--color', action='store_true', default=False, help='colored output')
     _list = subparsers.add_parser('list')
-    _list.add_argument('build', help='build number', type=int)
+    _list.add_argument('builds', help='build number(s)', type=int, nargs='+')
+    _list.add_argument('--keys-only', help='List only matching keys', default=False, action='store_true', dest='keys_only')
     parser.add_argument('-c', '--config', default=os.path.expanduser("~/.bdiff"),
                         help='A path to configuration file [Default: ~/.bdiff]')
     parser.add_argument('-f', '--flags', help='Python regex flags, eg: "I" or "I|M"', default=0, type=_parse_flags)
@@ -92,13 +93,18 @@ def main():
     auth = HTTPBasicAuth(conf['jenkins']['user'], conf['jenkins']['password'])
     regex = re.compile(args.re, args.flags)
     if args.command == 'list':
-        build = Build(auth, conf['jenkins']['url'], conf['jenkins']['job'], args.build)
-        grouped = group_by_regex(build.console_output(), regex, args.key_group, args.values_group)
-        for key, values in grouped.items():
-            print(key)
-            for value in values:
-                print("\t{}".format(value))
-            print()
+        for bn in args.builds:
+            build = Build(auth, conf['jenkins']['url'], conf['jenkins']['job'], bn)
+            grouped = group_by_regex(build.console_output(), regex, args.key_group, args.values_group)
+            if args.keys_only:
+                for key in grouped.keys():
+                    print(key)
+            else:
+                for key, values in grouped.items():
+                    print(key)
+                    for value in values:
+                        print("\t{}".format(value))
+                    print()
     elif args.command == 'diff':
         build_a = Build(auth, conf['jenkins']['url'], conf['jenkins']['job'], args.build_a)
         build_b = Build(auth, conf['jenkins']['url'], conf['jenkins']['job'], args.build_b)
